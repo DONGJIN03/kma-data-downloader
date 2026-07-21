@@ -29,7 +29,7 @@ from datetime import datetime
 
 # ==================== 설정 ====================
 MODE = "run"                     # "dump" / "dry" / "run"
-YEARS = [2021]                   # 1년치씩 진행
+YEARS = [2024]                   # 1년치씩 진행
 DELAY_SEC = 4                    # 신청 간 대기
 LOG_FILE = "신청로그.csv"
 DOWNLOAD_ROOT = r"C:\kma_auto\다운로드"   # PDF 저장 루트 폴더
@@ -294,8 +294,11 @@ def fetch_new_pdf(page, prev_no, year, sea, part, wcode):
         print(f"\n   [디버그] onclick = {onclick!r}")
         return "실패", "발급 파라미터 해석 실패 (위 디버그 출력 확인)"
 
-    fname = f"기상특보(해상)_{year}_{WARN_FULL[wcode]}.pdf"
-    save_path = os.path.join(DOWNLOAD_ROOT, str(year), sea, part, fname)
+    fname = f"기상특보(해상)_{year}_{sea}_{part}_{WARN_FULL[wcode]}.pdf"
+    # 폴더명은 (1)(2) 등 괄호 꼬리를 떼어 통일(예: 앞바다(1)->앞바다),
+    # 파일명(fname)에는 part 원본을 그대로 써서 (1)(2) 구분 유지
+    folder_part = re.sub(r'\(.*?\)$', '', part)
+    save_path = os.path.join(DOWNLOAD_ROOT, str(year), sea, folder_part, fname)
     ok, note = download_pdf(page, url, save_path)
     if ok:
         return "저장완료", f"{save_path} ({note})"
@@ -321,6 +324,11 @@ def main():
             return
 
         dry = (MODE == "dry")
+        if not dry and not BOARD_URL:
+            print("[중단] BOARD_URL이 비어 있습니다.")
+            print("  엣지에서 나의민원 > 민원보관함 화면의 주소창 URL을 복사해서")
+            print('  코드 상단 BOARD_URL = "" 안에 붙여넣고 저장 후 다시 실행하세요.')
+            return
         print(f"총 {len(jobs)}건 / 모드: {MODE}")
         if not dry:
             print(f"PDF 저장 위치: {DOWNLOAD_ROOT}\n")

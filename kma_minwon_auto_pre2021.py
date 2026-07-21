@@ -30,8 +30,8 @@ import time
 from datetime import datetime
 
 # ==================== 설정 ====================
-MODE = "run"                     # "dump" / "dry" / "run"
-YEARS = [2019, 2020]                   # 1년치씩 진행
+MODE = "dry"                     # "dump" / "dry" / "run"
+YEARS = [2020]                   # 1년치씩 진행
 DELAY_SEC = 4                    # 신청 간 대기
 LOG_FILE = "신청로그.csv"
 DOWNLOAD_ROOT = r"C:\kma_auto\다운로드"   # PDF 저장 루트 폴더
@@ -293,7 +293,7 @@ def fetch_new_pdf(page, prev_no, year, sea, part, wcode):
         print(f"\n   [디버그] onclick = {onclick!r}")
         return "실패", "발급 파라미터 해석 실패 (위 디버그 출력 확인)"
 
-    fname = f"기상특보(해상)_{year}_{WARN_FULL[wcode]}.pdf"
+    fname = f"기상특보(해상)_{year}_{sea}_{part}_{WARN_FULL[wcode]}.pdf"
     save_path = os.path.join(DOWNLOAD_ROOT, str(year), sea, part, fname)
     ok, note = download_pdf(page, url, save_path)
     if ok:
